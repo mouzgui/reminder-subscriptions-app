@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { supabase, signIn, signUp, signOut, getCurrentSession } from '../lib/supabase';
 import { User, AuthState } from '../types/user';
 
+// Track if auth listener is already set up
+let authListenerSetUp = false;
+
 interface UserState extends AuthState {
     // Actions
     initialize: () => Promise<void>;
@@ -18,7 +21,9 @@ export const useUserStore = create<UserState>()((set, get) => ({
     isAuthenticated: false,
 
     initialize: async () => {
-        set({ isLoading: true });
+        // Prevent multiple initializations
+        if (get().isLoading === false) return;
+
         try {
             const session = await getCurrentSession();
 
@@ -34,32 +39,36 @@ export const useUserStore = create<UserState>()((set, get) => ({
                     isLoading: false,
                 });
             } else {
-                set({ isLoading: false });
+                set({ isLoading: false, isAuthenticated: false });
             }
 
-            // Listen for auth changes
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (session?.user) {
-                    set({
-                        user: {
-                            id: session.user.id,
-                            email: session.user.email || '',
-                            created_at: session.user.created_at,
-                        },
-                        session,
-                        isAuthenticated: true,
-                    });
-                } else {
-                    set({
-                        user: null,
-                        session: null,
-                        isAuthenticated: false,
-                    });
-                }
-            });
+            // Only set up auth listener once
+            if (!authListenerSetUp) {
+                authListenerSetUp = true;
+                supabase.auth.onAuthStateChange((event, session) => {
+                    console.log('Auth state changed:', event);
+                    if (session?.user) {
+                        set({
+                            user: {
+                                id: session.user.id,
+                                email: session.user.email || '',
+                                created_at: session.user.created_at,
+                            },
+                            session,
+                            isAuthenticated: true,
+                        });
+                    } else {
+                        set({
+                            user: null,
+                            session: null,
+                            isAuthenticated: false,
+                        });
+                    }
+                });
+            }
         } catch (error) {
             console.error('Failed to initialize auth:', error);
-            set({ isLoading: false });
+            set({ isLoading: false, isAuthenticated: false });
         }
     },
 

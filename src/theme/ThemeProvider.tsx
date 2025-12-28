@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightTheme, darkTheme, Theme } from './tokens';
 
@@ -24,9 +24,8 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
     const systemColorScheme = useColorScheme();
     const [mode, setModeState] = useState<ThemeMode>('system');
-    const [isLoaded, setIsLoaded] = useState(false);
 
-    // Load saved theme preference
+    // Load saved theme preference (non-blocking)
     useEffect(() => {
         const loadTheme = async () => {
             try {
@@ -35,9 +34,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
                     setModeState(savedMode as ThemeMode);
                 }
             } catch (error) {
-                console.warn('Failed to load theme preference:', error);
-            } finally {
-                setIsLoaded(true);
+                // AsyncStorage may not work on web, ignore errors
+                console.log('Theme load skipped:', error);
             }
         };
         loadTheme();
@@ -57,7 +55,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         try {
             await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
         } catch (error) {
-            console.warn('Failed to save theme preference:', error);
+            console.log('Theme save skipped:', error);
         }
     };
 
@@ -67,11 +65,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         setMode(newMode);
     };
 
-    // Don't render until theme is loaded
-    if (!isLoaded) {
-        return null;
-    }
-
+    // Always render children immediately - no waiting
     return (
         <ThemeContext.Provider value={{ theme, mode, isDark, setMode, toggleTheme }}>
             {children}
@@ -97,3 +91,4 @@ export function useThemeColors() {
     const { theme } = useTheme();
     return theme;
 }
+

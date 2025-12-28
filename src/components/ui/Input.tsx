@@ -19,7 +19,7 @@ export function Input({
     style,
     ...props
 }: InputProps) {
-    const { theme } = useTheme();
+    const { theme, isDark } = useTheme();
     const [isFocused, setIsFocused] = useState(false);
 
     const borderColor = error
@@ -28,15 +28,21 @@ export function Input({
             ? theme.border.focus
             : theme.border.default;
 
+    const backgroundColor = isFocused
+        ? isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.03)'
+        : theme.bg.card;
+
     return (
         <View style={{ marginBottom: 16 }}>
             {label && (
                 <Text
                     style={{
-                        fontSize: 14,
-                        fontWeight: '500',
-                        color: theme.text.secondary,
-                        marginBottom: 6,
+                        fontSize: 13,
+                        fontWeight: '600',
+                        color: isFocused ? theme.text.brand : theme.text.secondary,
+                        marginBottom: 8,
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
                     }}
                 >
                     {label}
@@ -46,48 +52,57 @@ export function Input({
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: theme.bg.secondary,
-                    borderWidth: 1.5,
+                    backgroundColor,
+                    borderWidth: isFocused ? 2 : 1,
                     borderColor,
-                    borderRadius: 10,
-                    paddingHorizontal: 12,
+                    borderRadius: 14,
+                    paddingHorizontal: 14,
+                    shadowColor: isFocused ? theme.border.focus : 'transparent',
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: isFocused ? 0.2 : 0,
+                    shadowRadius: 8,
                 }}
             >
-                {leftIcon && <View style={{ marginRight: 8 }}>{leftIcon}</View>}
+                {leftIcon && <View style={{ marginRight: 10 }}>{leftIcon}</View>}
                 <TextInput
                     style={[
                         {
                             flex: 1,
-                            paddingVertical: 12,
+                            paddingVertical: 14,
                             fontSize: 16,
                             color: theme.text.primary,
+                            fontWeight: '500',
                         },
                         style,
                     ]}
                     placeholderTextColor={theme.text.tertiary}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
+                    selectionColor={theme.interactive.primary}
                     {...props}
                 />
-                {rightIcon && <View style={{ marginLeft: 8 }}>{rightIcon}</View>}
+                {rightIcon && <View style={{ marginLeft: 10 }}>{rightIcon}</View>}
             </View>
             {error && (
-                <Text
-                    style={{
-                        fontSize: 12,
-                        color: theme.status.danger,
-                        marginTop: 4,
-                    }}
-                >
-                    {error}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                    <Text style={{ fontSize: 12, marginRight: 4 }}>⚠️</Text>
+                    <Text
+                        style={{
+                            fontSize: 13,
+                            color: theme.status.danger,
+                            fontWeight: '500',
+                        }}
+                    >
+                        {error}
+                    </Text>
+                </View>
             )}
             {hint && !error && (
                 <Text
                     style={{
                         fontSize: 12,
                         color: theme.text.tertiary,
-                        marginTop: 4,
+                        marginTop: 6,
                     }}
                 >
                     {hint}
