@@ -1,0 +1,165 @@
+{
+    "app": {
+        "name": "Zombie Subscriptions",
+        "tagline": "Stop losing money to forgotten renewals"
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "done": "Done",
+        "back": "Back",
+        "next": "Next",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "confirm": "Confirm",
+        "yes": "Yes",
+        "no": "No",
+        "ok": "OK",
+        "search": "Search",
+        "noResults": "No results found"
+    },
+    "tabs": {
+        "dashboard": "Dashboard",
+        "add": "Add",
+        "settings": "Settings"
+    },
+    "dashboard": {
+        "title": "Your Subscriptions",
+        "empty": {
+            "title": "No subscriptions yet",
+            "subtitle": "Add your first subscription to start tracking"
+        },
+        "burnRate": {
+            "title": "Monthly Burn Rate",
+            "subtitle": "Total cost per month"
+        },
+        "renewingSoon": "Renewing Soon",
+        "active": "Active",
+        "expired": "Expired"
+    },
+    "subscription": {
+        "add": {
+            "title": "Add Subscription",
+            "namePlaceholder": "Subscription name (e.g., Netflix)",
+            "pricePlaceholder": "Price",
+            "selectCurrency": "Select currency",
+            "renewalDate": "Renewal date",
+            "category": "Category (optional)",
+            "notes": "Notes (optional)"
+        },
+        "detail": {
+            "title": "Subscription Details",
+            "renewsIn": "Renews in {{days}} days",
+            "renewsTomorrow": "Renews tomorrow!",
+            "renewsToday": "Renews today!",
+            "expired": "Expired {{days}} days ago"
+        },
+        "categories": {
+            "streaming": "Streaming",
+            "productivity": "Productivity",
+            "cloud": "Cloud Storage",
+            "design": "Design",
+            "development": "Development",
+            "marketing": "Marketing",
+            "finance": "Finance",
+            "other": "Other"
+        },
+        "status": {
+            "active": "Active",
+            "expiringSoon": "Expiring Soon",
+            "expired": "Expired",
+            "paused": "Paused"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "appearance": {
+            "title": "Appearance",
+            "theme": "Theme",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+        },
+        "language": {
+            "title": "Language",
+            "select": "Select language"
+        },
+        "currency": {
+            "title": "Default Currency",
+            "select": "Select currency"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "push": "Push notifications",
+            "email": "Email reminders",
+            "reminder7days": "Remind 7 days before",
+            "reminder1day": "Remind 1 day before"
+        },
+        "account": {
+            "title": "Account",
+            "signOut": "Sign Out",
+            "deleteAccount": "Delete Account"
+        },
+        "pro": {
+            "title": "Upgrade to Pro",
+            "subtitle": "Unlock unlimited subscriptions & reminders",
+            "features": {
+                "unlimited": "Unlimited subscriptions",
+                "reminders": "Automated reminders",
+                "languages": "All languages",
+                "currencies": "All currencies",
+                "export": "CSV export"
+            },
+            "upgrade": "Upgrade Now"
+        },
+        "about": {
+            "title": "About",
+            "version": "Version",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service"
+        }
+    },
+    "auth": {
+        "signIn": {
+            "title": "Welcome Back",
+            "subtitle": "Sign in to your account",
+            "email": "Email",
+            "password": "Password",
+            "forgotPassword": "Forgot password?",
+            "button": "Sign In",
+            "noAccount": "Don't have an account?",
+            "signUp": "Sign Up"
+        },
+        "signUp": {
+            "title": "Create Account",
+            "subtitle": "Start tracking your subscriptions",
+            "email": "Email",
+            "password": "Password",
+            "confirmPassword": "Confirm password",
+            "button": "Create Account",
+            "hasAccount": "Already have an account?",
+            "signIn": "Sign In"
+        }
+    },
+    "notifications": {
+        "reminder7days": "Your {{name}} subscription renews in 7 days",
+        "reminder1day": "⚠️ {{name}} renews tomorrow!",
+        "renewalToday": "🔔 {{name}} renews today"
+    },
+    "errors": {
+        "required": "This field is required",
+        "invalidEmail": "Please enter a valid email",
+        "passwordMin": "Password must be at least 8 characters",
+        "passwordMatch": "Passwords do not match",
+        "generic": "Something went wrong. Please try again."
+    },
+    "paywall": {
+        "title": "Free Tier Limit",
+        "message": "You've reached the limit of 3 subscriptions on the free tier",
+        "upgrade": "Upgrade to Pro"
+    }
+}
