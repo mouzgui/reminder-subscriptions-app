@@ -1,7 +1,6 @@
-// Learn more https://docs.expo.dev/guides/customizing-metro
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 
-/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
 // Configure transformer for web platform
@@ -16,4 +15,4 @@ config.resolver = {
     sourceExts: [...(config.resolver?.sourceExts || []), 'mjs'],
 };
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: './global.css' });

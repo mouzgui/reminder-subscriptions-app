@@ -36,4 +36,5 @@ export interface AuthState {
     session: any | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    isInitialized: boolean;
 }

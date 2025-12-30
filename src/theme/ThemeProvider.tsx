@@ -65,9 +65,18 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         setMode(newMode);
     };
 
+    // Memoize the context value to prevent unnecessary re-renders
+    const contextValue = React.useMemo(() => ({
+        theme,
+        mode,
+        isDark,
+        setMode,
+        toggleTheme
+    }), [theme, mode, isDark]);
+
     // Always render children immediately - no waiting
     return (
-        <ThemeContext.Provider value={{ theme, mode, isDark, setMode, toggleTheme }}>
+        <ThemeContext.Provider value={contextValue}>
             {children}
         </ThemeContext.Provider>
     );

@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme';
 
-type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default' | 'brand';
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default' | 'brand' | 'primary';
 type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface BadgeProps {
     variant?: BadgeVariant;
     size?: BadgeSize;
     children: React.ReactNode;
+    style?: ViewStyle;
 }
 
-export function Badge({ variant = 'default', size = 'md', children }: BadgeProps) {
+export function Badge({ variant = 'default', size = 'md', children, style }: BadgeProps) {
     const { theme, isDark } = useTheme();
 
     const getVariantStyles = () => {
@@ -49,6 +50,12 @@ export function Badge({ variant = 'default', size = 'md', children }: BadgeProps
                     textColor: theme.text.brand,
                     borderColor: `${theme.interactive.primary}40`,
                 };
+            case 'primary':
+                return {
+                    backgroundColor: theme.interactive.primary,
+                    textColor: '#FFFFFF',
+                    borderColor: theme.interactive.primary,
+                };
             default:
                 return {
                     backgroundColor: theme.bg.tertiary,
@@ -69,7 +76,7 @@ export function Badge({ variant = 'default', size = 'md', children }: BadgeProps
 
     return (
         <View
-            style={{
+            style={[{
                 backgroundColor: variantStyles.backgroundColor,
                 paddingHorizontal: currentSize.paddingHorizontal,
                 paddingVertical: currentSize.paddingVertical,
@@ -77,7 +84,7 @@ export function Badge({ variant = 'default', size = 'md', children }: BadgeProps
                 borderWidth: 1,
                 borderColor: variantStyles.borderColor,
                 alignSelf: 'flex-start',
-            }}
+            }, style]}
         >
             <Text
                 style={{

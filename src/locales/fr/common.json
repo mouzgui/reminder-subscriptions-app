@@ -1,165 +1,196 @@
 {
-    "app": {
-        "name": "Zombie Subscriptions",
-        "tagline": "Arrêtez de perdre de l'argent avec les renouvellements oubliés"
+  "app": {
+    "name": "Zombie Subscriptions",
+    "tagline": "Arrêtez de perdre de l'argent avec les renouvellements oubliés"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "done": "Terminé",
+    "back": "Retour",
+    "next": "Suivant",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat trouvé"
+  },
+  "tabs": {
+    "dashboard": "Tableau de bord",
+    "add": "Ajouter",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "Vos Abonnements",
+    "empty": {
+      "title": "Aucun abonnement",
+      "subtitle": "Ajoutez votre premier abonnement pour commencer"
     },
-    "common": {
-        "save": "Enregistrer",
-        "cancel": "Annuler",
-        "delete": "Supprimer",
-        "edit": "Modifier",
-        "add": "Ajouter",
-        "done": "Terminé",
-        "back": "Retour",
-        "next": "Suivant",
-        "loading": "Chargement...",
-        "error": "Erreur",
-        "success": "Succès",
-        "confirm": "Confirmer",
-        "yes": "Oui",
-        "no": "Non",
-        "ok": "OK",
-        "search": "Rechercher",
-        "noResults": "Aucun résultat trouvé"
+    "burnRate": {
+      "title": "Coût Mensuel",
+      "subtitle": "Coût total par mois",
+      "yearly": "/an",
+      "yearlyForecast": "Estimation Annuelle",
+      "activeSubscriptions": "Abonnements Actifs"
     },
-    "tabs": {
-        "dashboard": "Tableau de bord",
-        "add": "Ajouter",
-        "settings": "Paramètres"
+    "renewingSoon": "Renouvellement proche",
+    "active": "Actif",
+    "expired": "Expiré"
+  },
+  "subscription": {
+    "add": {
+      "title": "Ajouter un Abonnement",
+      "namePlaceholder": "Nom de l'abonnement",
+      "nameExample": "ex: Netflix",
+      "pricePlaceholder": "Prix mensuel",
+      "priceExample": "0.00",
+      "currencyLabel": "Devise",
+      "category": "Catégorie",
+      "submit": "Ajouter un Abonnement",
+      "success": "Ajouté {{name}} pour {{price}}",
+      "error": "Échec de l'ajout de l'abonnement"
     },
-    "dashboard": {
-        "title": "Vos Abonnements",
-        "empty": {
-            "title": "Aucun abonnement",
-            "subtitle": "Ajoutez votre premier abonnement pour commencer"
-        },
-        "burnRate": {
-            "title": "Coût Mensuel",
-            "subtitle": "Coût total par mois"
-        },
-        "renewingSoon": "Renouvellement proche",
-        "active": "Actif",
-        "expired": "Expiré"
+    "detail": {
+      "title": "Détails de l'Abonnement",
+      "renewalDate": "Date de renouvellement",
+      "renewalDatePlaceholder": "AAAA-MM-JJ",
+      "notes": "Notes",
+      "delete": "Supprimer l'abonnement",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer {{name}} ?",
+      "notFound": "Abonnement non trouvé",
+      "renewsToday": "Renouvellement aujourd'hui",
+      "renewsTomorrow": "Renouvellement demain",
+      "renewsIn": "Renouvellement dans {{days}} jours",
+      "expired": "Expiré il y a {{days}} jours",
+      "updateSuccess": "Abonnement mis à jour avec succès"
     },
-    "subscription": {
-        "add": {
-            "title": "Ajouter un Abonnement",
-            "namePlaceholder": "Nom de l'abonnement (ex: Netflix)",
-            "pricePlaceholder": "Prix",
-            "selectCurrency": "Choisir la devise",
-            "renewalDate": "Date de renouvellement",
-            "category": "Catégorie (optionnel)",
-            "notes": "Notes (optionnel)"
-        },
-        "detail": {
-            "title": "Détails de l'Abonnement",
-            "renewsIn": "Renouvellement dans {{days}} jours",
-            "renewsTomorrow": "Renouvellement demain!",
-            "renewsToday": "Renouvellement aujourd'hui!",
-            "expired": "Expiré il y a {{days}} jours"
-        },
-        "categories": {
-            "streaming": "Streaming",
-            "productivity": "Productivité",
-            "cloud": "Stockage Cloud",
-            "design": "Design",
-            "development": "Développement",
-            "marketing": "Marketing",
-            "finance": "Finance",
-            "other": "Autre"
-        },
-        "status": {
-            "active": "Actif",
-            "expiringSoon": "Expire bientôt",
-            "expired": "Expiré",
-            "paused": "En pause"
-        }
+    "categories": {
+      "streaming": "Streaming",
+      "productivity": "Productivité",
+      "cloud": "Stockage Cloud",
+      "design": "Design",
+      "development": "Développement",
+      "marketing": "Marketing",
+      "finance": "Finance",
+      "other": "Autre"
     },
-    "settings": {
-        "title": "Paramètres",
-        "appearance": {
-            "title": "Apparence",
-            "theme": "Thème",
-            "light": "Clair",
-            "dark": "Sombre",
-            "system": "Système"
-        },
-        "language": {
-            "title": "Langue",
-            "select": "Choisir la langue"
-        },
-        "currency": {
-            "title": "Devise par Défaut",
-            "select": "Choisir la devise"
-        },
-        "notifications": {
-            "title": "Notifications",
-            "push": "Notifications push",
-            "email": "Rappels par email",
-            "reminder7days": "Rappel 7 jours avant",
-            "reminder1day": "Rappel 1 jour avant"
-        },
-        "account": {
-            "title": "Compte",
-            "signOut": "Déconnexion",
-            "deleteAccount": "Supprimer le compte"
-        },
-        "pro": {
-            "title": "Passer à Pro",
-            "subtitle": "Débloquez les abonnements illimités et les rappels",
-            "features": {
-                "unlimited": "Abonnements illimités",
-                "reminders": "Rappels automatiques",
-                "languages": "Toutes les langues",
-                "currencies": "Toutes les devises",
-                "export": "Export CSV"
-            },
-            "upgrade": "Mettre à niveau"
-        },
-        "about": {
-            "title": "À propos",
-            "version": "Version",
-            "privacy": "Politique de confidentialité",
-            "terms": "Conditions d'utilisation"
-        }
+    "status": {
+      "active": "Actif",
+      "expiringSoon": "Expire bientôt",
+      "expired": "Expiré",
+      "paused": "En pause"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "appearance": {
+      "title": "Apparence",
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
     },
-    "auth": {
-        "signIn": {
-            "title": "Bon Retour",
-            "subtitle": "Connectez-vous à votre compte",
-            "email": "Email",
-            "password": "Mot de passe",
-            "forgotPassword": "Mot de passe oublié?",
-            "button": "Se connecter",
-            "noAccount": "Pas encore de compte?",
-            "signUp": "S'inscrire"
-        },
-        "signUp": {
-            "title": "Créer un Compte",
-            "subtitle": "Commencez à suivre vos abonnements",
-            "email": "Email",
-            "password": "Mot de passe",
-            "confirmPassword": "Confirmer le mot de passe",
-            "button": "Créer un compte",
-            "hasAccount": "Déjà un compte?",
-            "signIn": "Se connecter"
-        }
+    "language": {
+      "title": "Langue",
+      "select": "Choisir la langue"
+    },
+    "currency": {
+      "title": "Devise par Défaut",
+      "select": "Choisir la devise"
     },
     "notifications": {
-        "reminder7days": "Votre abonnement {{name}} se renouvelle dans 7 jours",
-        "reminder1day": "⚠️ {{name}} se renouvelle demain!",
-        "renewalToday": "🔔 {{name}} se renouvelle aujourd'hui"
+      "title": "Notifications",
+      "push": "Notifications push",
+      "email": "Rappels par email",
+      "reminder7days": "Rappel 7 jours avant",
+      "reminder1day": "Rappel 1 jour avant"
     },
-    "errors": {
-        "required": "Ce champ est requis",
-        "invalidEmail": "Veuillez entrer un email valide",
-        "passwordMin": "Le mot de passe doit contenir au moins 8 caractères",
-        "passwordMatch": "Les mots de passe ne correspondent pas",
-        "generic": "Une erreur s'est produite. Veuillez réessayer."
+    "account": {
+      "title": "Compte",
+      "emailLabel": "Email",
+      "signOut": "Déconnexion",
+      "signOutConfirm": "Êtes-vous sûr de vouloir vous déconnecter?",
+      "deleteAccount": "Supprimer le compte",
+      "syncMessage": "Connectez-vous pour synchroniser vos données"
     },
-    "paywall": {
-        "title": "Limite du forfait gratuit",
-        "message": "Vous avez atteint la limite de 3 abonnements sur le forfait gratuit",
-        "upgrade": "Passer à Pro"
+    "pro": {
+      "title": "Passer à Pro",
+      "subtitle": "Débloquez des abonnements et rappels illimités",
+      "export": "Exporter les abonnements",
+      "exportSubtitle": "Enregistrer vos données au format CSV",
+      "exportSuccess": "Exportation réussie",
+      "exportFailed": "L'exportation a échoué",
+      "noData": "Aucune donnée",
+      "noDataMessage": "Ajoutez d'abord des abonnements pour les exporter.",
+      "features": {
+        "unlimited": "Abonnements illimités",
+        "reminders": "Rappels automatiques",
+        "languages": "Toutes les langues",
+        "currencies": "Toutes les devises",
+        "export": "Exportation CSV"
+      },
+      "upgrade": "Passer à Pro"
+    },
+    "data": {
+      "title": "Gestion des données",
+      "export": "Exporter les données",
+      "clear": "Effacer toutes les données"
+    },
+    "about": {
+      "title": "À propos",
+      "version": "Version",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation"
+    },
+    "footer": {
+      "tagline": "Zombie Subscriptions",
+      "madeBy": "Fait avec ❤️ pour les freelances"
     }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bon Retour",
+      "subtitle": "Connectez-vous à votre compte",
+      "email": "Email",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié?",
+      "button": "Se connecter",
+      "noAccount": "Pas encore de compte?",
+      "signUp": "S'inscrire"
+    },
+    "signUp": {
+      "title": "Créer un Compte",
+      "subtitle": "Commencez à suivre vos abonnements",
+      "email": "Email",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "button": "Créer un compte",
+      "hasAccount": "Déjà un compte?",
+      "signIn": "Se connecter"
+    }
+  },
+  "notifications": {
+    "reminder7days": "Votre abonnement {{name}} se renouvelle dans 7 jours",
+    "reminder1day": "⚠️ {{name}} se renouvelle demain!",
+    "renewalToday": "🔔 {{name}} se renouvelle aujourd'hui"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalidEmail": "Veuillez entrer un email valide",
+    "passwordMin": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordMatch": "Les mots de passe ne correspondent pas",
+    "generic": "Une erreur s'est produite. Veuillez réessayer."
+  },
+  "paywall": {
+    "title": "Limite du forfait gratuit",
+    "message": "Vous avez atteint la limite de 3 abonnements sur le forfait gratuit",
+    "upgrade": "Passer à Pro"
+  }
 }
