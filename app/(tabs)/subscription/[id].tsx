@@ -3,20 +3,19 @@ import {
   View,
   Text,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { SvgUri } from "react-native-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../../src/theme";
-import { Button, Card, Input, Badge } from "../../../src/components/ui";
+import { Button, Card, Input, Badge, ConfirmModal, DatePicker } from "../../../src/components/ui";
 import {
-  CURRENCIES,
   CurrencyCode,
   formatCurrency,
 } from "../../../src/utils/currency";
@@ -24,31 +23,25 @@ import { useSubscriptionStore } from "../../../src/store/subscriptionStore";
 import { useUserStore } from "../../../src/store/userStore";
 import { SubscriptionCategory } from "../../../src/types/subscription";
 import { daysUntil } from "../../../src/utils/date";
-
-// Category icons mapping
-const CATEGORY_ICONS: Record<string, string> = {
-  streaming: "📺",
-  productivity: "⚡",
-  cloud: "☁️",
-  design: "🎨",
-  development: "💻",
-  marketing: "📣",
-  finance: "💰",
-  gaming: "🎮",
-  fitness: "💪",
-  music: "🎵",
-  news: "📰",
-  other: "📦",
-};
+import {
+  CATEGORY_ICONS,
+  Trash2,
+  Calendar,
+  Package,
+  FileText,
+  ArrowLeft,
+  Edit3,
+} from "../../../src/components/icons";
+import { getSubscriptionLogo } from "../../../src/constants/popularSubscriptions";
 
 function DetailRow({
   label,
   value,
-  icon,
+  icon: IconComponent,
 }: {
   label: string;
   value: string;
-  icon?: string;
+  icon: any;
 }) {
   const { theme, isDark } = useTheme();
   return (
@@ -57,38 +50,39 @@ function DetailRow({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingVertical: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 4,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
         <View
           style={{
-            width: 42,
-            height: 42,
-            borderRadius: 12,
+            width: 36,
+            height: 36,
+            borderRadius: 10,
             backgroundColor: isDark
-              ? "rgba(139, 92, 246, 0.15)"
-              : "rgba(139, 92, 246, 0.08)",
+              ? "rgba(139, 92, 246, 0.12)"
+              : "rgba(139, 92, 246, 0.06)",
             alignItems: "center",
             justifyContent: "center",
-            marginRight: 16,
+            marginRight: 12,
           }}
         >
-          <Text style={{ fontSize: 20 }}>{icon}</Text>
+          <IconComponent size={18} color={theme.text.brand} strokeWidth={2} />
         </View>
         <View style={{ flex: 1 }}>
           <Text
             style={{
-              fontSize: 13,
+              fontSize: 11,
               color: theme.text.tertiary,
-              marginBottom: 2,
+              marginBottom: 1,
             }}
           >
             {label}
           </Text>
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 14,
               color: theme.text.primary,
               fontWeight: "600",
             }}
@@ -109,6 +103,11 @@ export default function SubscriptionDetailScreen() {
   const router = useRouter();
 
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showNotFoundModal, setShowNotFoundModal] = useState(false);
 
   // Selectors
   const subscription = useSubscriptionStore((state) =>
@@ -139,6 +138,10 @@ export default function SubscriptionDetailScreen() {
   const [renewalDate, setRenewalDate] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Get real logo
+  const logoUrl = subscription ? getSubscriptionLogo(subscription.name) : null;
+  const CategoryIcon = CATEGORY_ICONS[subscription?.category || "other"];
+
   useEffect(() => {
     if (subscription) {
       setName(subscription.name);
@@ -148,49 +151,30 @@ export default function SubscriptionDetailScreen() {
       setRenewalDate(subscription.renewal_date);
       setNotes(subscription.notes || "");
     } else if (!isDeleting) {
-      // Only show error if we're not in the middle of deleting it
-      Alert.alert(t("common.error"), t("subscription.detail.notFound"), [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      setShowNotFoundModal(true);
     }
   }, [subscription, isDeleting]);
 
   const handleDelete = async () => {
     if (!subscription) return;
-
-    Alert.alert(
-      t("common.delete"),
-      t("subscription.detail.deleteConfirm", { name: subscription.name }),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.delete"),
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setIsDeleting(true);
-              await deleteSubscription(subscription.id);
-              router.back();
-            } catch (error: any) {
-              setIsDeleting(false);
-              Alert.alert(t("common.error"), error.message);
-            }
-          },
-        },
-      ]
-    );
+    try {
+      setIsDeleting(true);
+      if (subscription.id.startsWith("local-") || subscription.id.startsWith("demo-")) {
+        deleteLocalSubscription(subscription.id);
+      } else {
+        await deleteSubscription(subscription.id);
+      }
+      router.back();
+    } catch (error: any) {
+      setIsDeleting(false);
+      console.log("Delete handled:", error.message);
+      router.back();
+    }
   };
 
   const handleSave = async () => {
     if (!subscription) return;
-    if (!name.trim()) {
-      Alert.alert(t("errors.required"), t("subscription.add.namePlaceholder"));
-      return;
-    }
-    if (!price || parseFloat(price) <= 0) {
-      Alert.alert(t("errors.required"), t("subscription.add.pricePlaceholder"));
-      return;
-    }
+    if (!name.trim() || !price || parseFloat(price) <= 0) return;
 
     const updates = {
       id: subscription.id,
@@ -199,7 +183,7 @@ export default function SubscriptionDetailScreen() {
       currency,
       renewal_date: renewalDate,
       category: (category || "other") as SubscriptionCategory,
-      notes: notes.trim() || null,
+      notes: notes.trim() || undefined,
     };
 
     try {
@@ -213,9 +197,9 @@ export default function SubscriptionDetailScreen() {
         updateLocalSubscription(updates);
       }
       setIsEditing(false);
-      Alert.alert(t("common.success"), t("subscription.detail.updateSuccess"));
+      setShowSuccessModal(true);
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      console.log("Update error:", error.message);
     }
   };
 
@@ -228,6 +212,7 @@ export default function SubscriptionDetailScreen() {
           justifyContent: "center",
           alignItems: "center",
         }}
+        edges={["top"]}
       >
         <ActivityIndicator size="large" color={theme.interactive.primary} />
       </SafeAreaView>
@@ -237,41 +222,41 @@ export default function SubscriptionDetailScreen() {
   const daysLeft = daysUntil(subscription.renewal_date);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.primary }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.primary }} edges={["top"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+        <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 80 }}>
           {/* Header */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: 24,
+              marginBottom: 20,
             }}
           >
             <TouchableOpacity
               onPress={() => router.back()}
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
+                width: 38,
+                height: 38,
+                borderRadius: 12,
                 backgroundColor: theme.bg.secondary,
                 alignItems: "center",
                 justifyContent: "center",
                 borderWidth: 1,
                 borderColor: isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.05)",
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.04)",
               }}
             >
-              <Text style={{ fontSize: 20, color: theme.text.primary }}>←</Text>
+              <ArrowLeft size={18} color={theme.text.primary} strokeWidth={2} />
             </TouchableOpacity>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: "700",
                 color: theme.text.primary,
               }}
@@ -279,33 +264,33 @@ export default function SubscriptionDetailScreen() {
               {isEditing ? t("common.edit") : t("subscription.detail.title")}
             </Text>
             <TouchableOpacity
-              onPress={handleDelete}
+              onPress={() => setShowDeleteModal(true)}
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
+                width: 38,
+                height: 38,
+                borderRadius: 12,
                 backgroundColor: isDark
-                  ? "rgba(239, 68, 68, 0.15)"
-                  : "rgba(239, 68, 68, 0.08)",
+                  ? "rgba(239, 68, 68, 0.12)"
+                  : "rgba(239, 68, 68, 0.06)",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ fontSize: 18 }}>🗑️</Text>
+              <Trash2 size={16} color={theme.status.danger} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
           {/* Main Content */}
           {isEditing ? (
             <Animated.View entering={FadeInDown.springify()}>
-              <Card variant="glass" style={{ marginBottom: 20 }}>
+              <Card variant="glass" style={{ marginBottom: 16 }}>
                 <Input
                   label={t("subscription.add.namePlaceholder")}
                   value={name}
                   onChangeText={setName}
                   placeholder={t("subscription.add.nameExample")}
                 />
-                <View style={{ flexDirection: "row", gap: 14 }}>
+                <View style={{ flexDirection: "row", gap: 12 }}>
                   <View style={{ flex: 1 }}>
                     <Input
                       label={t("subscription.add.pricePlaceholder")}
@@ -324,22 +309,22 @@ export default function SubscriptionDetailScreen() {
                     />
                   </View>
                 </View>
-                <Input
+                <DatePicker
                   label={t("subscription.detail.renewalDate")}
                   value={renewalDate}
-                  onChangeText={setRenewalDate}
-                  placeholder={t("subscription.detail.renewalDatePlaceholder")}
+                  onChange={setRenewalDate}
+                  minimumDate={new Date()}
                 />
                 <Input
                   label={t("subscription.detail.notes")}
                   value={notes}
                   onChangeText={setNotes}
                   multiline
-                  numberOfLines={3}
+                  numberOfLines={2}
                 />
               </Card>
 
-              <View style={{ flexDirection: "row", gap: 12 }}>
+              <View style={{ flexDirection: "row", gap: 10 }}>
                 <Button
                   variant="outline"
                   style={{ flex: 1 }}
@@ -358,43 +343,49 @@ export default function SubscriptionDetailScreen() {
               </View>
             </Animated.View>
           ) : (
-            <Animated.View entering={FadeInDown.delay(100).springify()}>
+            <Animated.View entering={FadeInDown.delay(80).springify()}>
               {/* Hero Info */}
               <Card
                 variant="glass"
                 style={{
                   alignItems: "center",
-                  paddingVertical: 32,
-                  marginBottom: 24,
+                  paddingVertical: 24,
+                  marginBottom: 16,
                   backgroundColor: isDark
-                    ? "rgba(139, 92, 246, 0.12)"
-                    : "rgba(139, 92, 246, 0.05)",
+                    ? "rgba(139, 92, 246, 0.1)"
+                    : "rgba(139, 92, 246, 0.04)",
                   borderWidth: 1,
                   borderColor: isDark
-                    ? "rgba(139, 92, 246, 0.2)"
-                    : "rgba(139, 92, 246, 0.1)",
+                    ? "rgba(139, 92, 246, 0.18)"
+                    : "rgba(139, 92, 246, 0.08)",
                 }}
               >
                 <View
                   style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 28,
+                    width: 64,
+                    height: 64,
+                    borderRadius: 18,
                     backgroundColor: isDark
-                      ? "rgba(139, 92, 246, 0.2)"
-                      : "rgba(139, 92, 246, 0.1)",
+                      ? "rgba(139, 92, 246, 0.15)"
+                      : "rgba(139, 92, 246, 0.08)",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginBottom: 16,
+                    marginBottom: 12,
                   }}
                 >
-                  <Text style={{ fontSize: 40 }}>
-                    {CATEGORY_ICONS[subscription.category || "other"]}
-                  </Text>
+                  {logoUrl ? (
+                    <SvgUri
+                      uri={logoUrl}
+                      width={32}
+                      height={32}
+                    />
+                  ) : (
+                    <CategoryIcon size={32} color={theme.text.brand} strokeWidth={2} />
+                  )}
                 </View>
                 <Text
                   style={{
-                    fontSize: 28,
+                    fontSize: 22,
                     fontWeight: "800",
                     color: theme.text.primary,
                     marginBottom: 4,
@@ -402,25 +393,30 @@ export default function SubscriptionDetailScreen() {
                 >
                   {subscription.name}
                 </Text>
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "800",
+                    color: theme.text.brand,
+                    marginBottom: 8,
+                  }}
+                >
+                  {formatCurrency(subscription.price, subscription.currency)}
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: theme.text.tertiary }}>/mo</Text>
+                </Text>
                 <Badge
                   variant={
-                    daysLeft <= 3
-                      ? "danger"
-                      : daysLeft <= 7
-                      ? "warning"
-                      : "success"
+                    daysLeft < 0 ? "danger" : daysLeft <= 3 ? "danger" : daysLeft <= 7 ? "warning" : "success"
                   }
-                  size="md"
+                  size="sm"
                 >
                   {daysLeft === 0
                     ? t("subscription.detail.renewsToday")
                     : daysLeft === 1
-                    ? t("subscription.detail.renewsTomorrow")
-                    : daysLeft < 0
-                    ? t("subscription.detail.expired", {
-                        days: Math.abs(daysLeft),
-                      })
-                    : t("subscription.detail.renewsIn", { days: daysLeft })}
+                      ? t("subscription.detail.renewsTomorrow")
+                      : daysLeft < 0
+                        ? t("subscription.detail.expired", { days: Math.abs(daysLeft) })
+                        : t("subscription.detail.renewsIn", { days: daysLeft })}
                 </Badge>
               </Card>
 
@@ -428,96 +424,100 @@ export default function SubscriptionDetailScreen() {
               <Card
                 variant="elevated"
                 style={{
-                  marginBottom: 24,
+                  marginBottom: 16,
                   backgroundColor: theme.bg.secondary,
-                  padding: 8,
+                  padding: 10,
                 }}
               >
                 <DetailRow
-                  label={t("subscription.add.pricePlaceholder")}
-                  value={formatCurrency(
-                    subscription.price,
-                    subscription.currency
-                  )}
-                  icon="💰"
-                />
-                <View
-                  style={{
-                    height: 1,
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.03)",
-                    marginHorizontal: 12,
-                  }}
-                />
-                <DetailRow
                   label={t("subscription.detail.renewalDate")}
                   value={subscription.renewal_date}
-                  icon="📅"
+                  icon={Calendar}
                 />
                 <View
                   style={{
                     height: 1,
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.03)",
-                    marginHorizontal: 12,
+                    backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                    marginHorizontal: 8,
                   }}
                 />
                 <DetailRow
                   label={t("subscription.add.category")}
-                  value={
-                    t(
-                      `subscription.categories.${
-                        subscription.category || "other"
-                      }`
-                    ) as string
-                  }
-                  icon="🏷️"
+                  value={t(`subscription.categories.${subscription.category || "other"}`) as string}
+                  icon={Package}
                 />
                 {subscription.notes && (
                   <>
                     <View
                       style={{
                         height: 1,
-                        backgroundColor: isDark
-                          ? "rgba(255,255,255,0.05)"
-                          : "rgba(0,0,0,0.03)",
-                        marginHorizontal: 12,
+                        backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                        marginHorizontal: 8,
                       }}
                     />
                     <DetailRow
                       label={t("subscription.detail.notes")}
                       value={subscription.notes}
-                      icon="📝"
+                      icon={FileText}
                     />
                   </>
                 )}
               </Card>
 
-              <View style={{ gap: 12 }}>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onPress={() => setIsEditing(true)}
-                  leftIcon={<Text>✏️</Text>}
-                >
-                  {t("common.edit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  fullWidth
-                  onPress={() => router.back()}
-                >
-                  {t("common.cancel")}
-                </Button>
-              </View>
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                onPress={() => setIsEditing(true)}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Edit3 size={16} color="#fff" strokeWidth={2} />
+                  <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>{t("common.edit")}</Text>
+                </View>
+              </Button>
             </Animated.View>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Delete Modal */}
+      <ConfirmModal
+        visible={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title={t("common.delete")}
+        message={t("subscription.detail.deleteConfirm", { name: subscription.name })}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+      />
+
+      {/* Success Modal */}
+      <ConfirmModal
+        visible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title={t("common.success")}
+        message={t("subscription.detail.updateSuccess")}
+        confirmText={t("common.ok")}
+        variant="success"
+        showCancel={false}
+        onConfirm={() => setShowSuccessModal(false)}
+      />
+
+      {/* Not Found Modal */}
+      <ConfirmModal
+        visible={showNotFoundModal}
+        onClose={() => {
+          setShowNotFoundModal(false);
+          router.back();
+        }}
+        title={t("common.error")}
+        message={t("subscription.detail.notFound")}
+        confirmText={t("common.ok")}
+        variant="warning"
+        showCancel={false}
+        onConfirm={() => router.back()}
+      />
     </SafeAreaView>
   );
 }

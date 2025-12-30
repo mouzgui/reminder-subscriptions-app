@@ -24,6 +24,8 @@ import {
     Smartphone,
     Home,
     ChevronRight,
+    ChevronLeft,
+    ChevronDown,
     X,
     Check,
     AlertTriangle,
@@ -32,6 +34,9 @@ import {
     TrendingDown,
     Calendar,
     Sparkles,
+    FileText,
+    ArrowLeft,
+    Edit3,
     type LucideIcon,
 } from 'lucide-react-native';
 
@@ -56,6 +61,8 @@ export {
     Smartphone,
     Home,
     ChevronRight,
+    ChevronLeft,
+    ChevronDown,
     X,
     Check,
     AlertTriangle,
@@ -64,7 +71,11 @@ export {
     TrendingDown,
     Calendar,
     Sparkles,
+    FileText,
+    ArrowLeft,
+    Edit3,
 };
+
 
 // Category icon mapping
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {

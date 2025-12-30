@@ -1,22 +1,8 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/theme';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
-
-// Simple icon components
-function TabIcon({ name, focused, color }: { name: string; focused: boolean; color: string }) {
-    const icons: Record<string, string> = {
-        home: '🏠',
-        add: '➕',
-        settings: '⚙️',
-    };
-
-    return (
-        <Text style={{ fontSize: focused ? 26 : 22 }}>
-            {icons[name] || '📱'}
-        </Text>
-    );
-}
+import { View } from 'react-native';
+import { Home, Plus, Settings } from 'lucide-react-native';
 
 export default function TabLayout() {
     const { theme, isDark } = useTheme();
@@ -34,12 +20,12 @@ export default function TabLayout() {
                     borderTopWidth: 1,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    height: 70,
+                    height: 65,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: '600',
-                    marginTop: 4,
+                    marginTop: 2,
                 },
             }}
         >
@@ -48,7 +34,19 @@ export default function TabLayout() {
                 options={{
                     title: t('tabs.dashboard'),
                     tabBarIcon: ({ focused, color }) => (
-                        <TabIcon name="home" focused={focused} color={color} />
+                        <View style={{
+                            padding: 6,
+                            borderRadius: 12,
+                            backgroundColor: focused
+                                ? isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)'
+                                : 'transparent',
+                        }}>
+                            <Home
+                                size={22}
+                                color={color}
+                                strokeWidth={focused ? 2.5 : 2}
+                            />
+                        </View>
                     ),
                 }}
             />
@@ -57,7 +55,19 @@ export default function TabLayout() {
                 options={{
                     title: t('tabs.add'),
                     tabBarIcon: ({ focused, color }) => (
-                        <TabIcon name="add" focused={focused} color={color} />
+                        <View style={{
+                            padding: 6,
+                            borderRadius: 12,
+                            backgroundColor: focused
+                                ? isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)'
+                                : 'transparent',
+                        }}>
+                            <Plus
+                                size={22}
+                                color={color}
+                                strokeWidth={focused ? 2.5 : 2}
+                            />
+                        </View>
                     ),
                 }}
             />
@@ -66,8 +76,26 @@ export default function TabLayout() {
                 options={{
                     title: t('tabs.settings'),
                     tabBarIcon: ({ focused, color }) => (
-                        <TabIcon name="settings" focused={focused} color={color} />
+                        <View style={{
+                            padding: 6,
+                            borderRadius: 12,
+                            backgroundColor: focused
+                                ? isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)'
+                                : 'transparent',
+                        }}>
+                            <Settings
+                                size={22}
+                                color={color}
+                                strokeWidth={focused ? 2.5 : 2}
+                            />
+                        </View>
                     ),
+                }}
+            />
+            <Tabs.Screen
+                name="subscription/[id]"
+                options={{
+                    href: null, // Hide from tab bar
                 }}
             />
         </Tabs>

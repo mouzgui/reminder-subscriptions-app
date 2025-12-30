@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { SvgUri } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../src/theme";
-import { Button, Card, Input, ConfirmModal } from "../../src/components/ui";
+import { Button, Card, Input, ConfirmModal, DatePicker, SafeSvgUri } from "../../src/components/ui";
 import { CURRENCIES, CurrencyCode } from "../../src/utils/currency";
 import { useSettingsStore } from "../../src/store/settingsStore";
 import { useSubscriptionStore } from "../../src/store/subscriptionStore";
@@ -20,9 +22,12 @@ import { router } from "expo-router";
 import {
   CATEGORY_ICONS,
   Crown,
-  Sparkles,
 } from "../../src/components/icons";
-import { Sparkles as SparklesIcon } from "lucide-react-native";
+import {
+  POPULAR_SUBSCRIPTIONS,
+  findPopularSubscription,
+  PopularSubscription,
+} from "../../src/constants/popularSubscriptions";
 
 export default function AddSubscriptionScreen() {
   const { theme, isDark } = useTheme();
@@ -34,6 +39,10 @@ export default function AddSubscriptionScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successName, setSuccessName] = useState("");
 
+  // Auto-suggest state
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<PopularSubscription | null>(null);
+
   const CATEGORIES = [
     { id: "streaming", label: t("subscription.categories.streaming") },
     { id: "productivity", label: t("subscription.categories.productivity") },
@@ -41,6 +50,9 @@ export default function AddSubscriptionScreen() {
     { id: "design", label: t("subscription.categories.design") },
     { id: "development", label: t("subscription.categories.development") },
     { id: "finance", label: t("subscription.categories.finance") },
+    { id: "music", label: t("subscription.categories.music") || "Music" },
+    { id: "gaming", label: t("subscription.categories.gaming") || "Gaming" },
+    { id: "fitness", label: t("subscription.categories.fitness") || "Fitness" },
     { id: "other", label: t("subscription.categories.other") },
   ];
 
@@ -61,7 +73,29 @@ export default function AddSubscriptionScreen() {
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState<CurrencyCode>(defaultCurrency);
   const [category, setCategory] = useState("");
-  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+
+  // Default to 30 days from now
+  const getDefaultDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().split("T")[0];
+  };
+  const [renewalDate, setRenewalDate] = useState(getDefaultDate());
+
+  // Suggestions based on name input
+  const suggestions = useMemo(() => {
+    if (name.length < 2) return [];
+    return findPopularSubscription(name);
+  }, [name]);
+
+  // Handle selecting a suggestion
+  const handleSelectSuggestion = (sub: PopularSubscription) => {
+    setName(sub.name);
+    setPrice(sub.defaultPrice.toString());
+    setCategory(sub.category);
+    setSelectedSuggestion(sub);
+    setShowSuggestions(false);
+  };
 
   // Check if user can add more subscriptions
   const currentCount = subscriptions.length;
@@ -79,15 +113,11 @@ export default function AddSubscriptionScreen() {
       return;
     }
 
-    // Calculate renewal date (30 days from now)
-    const renewalDate = new Date();
-    renewalDate.setDate(renewalDate.getDate() + 30);
-
     const subscriptionData = {
       name: name.trim(),
       price: parseFloat(price),
       currency,
-      renewal_date: renewalDate.toISOString().split("T")[0],
+      renewal_date: renewalDate,
       category: (category || "other") as SubscriptionCategory,
     };
 
@@ -173,10 +203,10 @@ export default function AddSubscriptionScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.primary }} edges={["top"]}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 16 }} keyboardShouldPersistTaps="handled">
         <Animated.View entering={FadeInDown.duration(500)}>
           {/* Header */}
-          <View style={{ marginBottom: 24 }}>
+          <View style={{ marginBottom: 20 }}>
             <Text
               style={{
                 fontSize: 13,
@@ -201,13 +231,118 @@ export default function AddSubscriptionScreen() {
             </Text>
           </View>
 
+          {/* Quick Add - Popular Subscriptions */}
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 12, fontWeight: "600", color: theme.text.tertiary, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              Popular
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+              {POPULAR_SUBSCRIPTIONS.slice(0, 8).map((sub) => (
+                <TouchableOpacity
+                  key={sub.id}
+                  onPress={() => handleSelectSuggestion(sub)}
+                  style={{
+                    alignItems: "center",
+                    marginHorizontal: 6,
+                    padding: 10,
+                    borderRadius: 14,
+                    backgroundColor: selectedSuggestion?.id === sub.id
+                      ? theme.interactive.primary
+                      : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+                    borderWidth: 1,
+                    borderColor: selectedSuggestion?.id === sub.id
+                      ? theme.interactive.primary
+                      : "transparent",
+                    width: 72,
+                  }}
+                >
+                  <SafeSvgUri
+                    uri={sub.logoUrl}
+                    width={28}
+                    height={28}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: "600",
+                      color: selectedSuggestion?.id === sub.id ? "#fff" : theme.text.secondary,
+                      textAlign: "center",
+                    }}
+                  >
+                    {sub.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
           <Card variant="glass" style={{ marginBottom: 20 }}>
-            <Input
-              label={t("subscription.add.namePlaceholder")}
-              value={name}
-              onChangeText={setName}
-              placeholder={t("subscription.add.nameExample")}
-            />
+            {/* Name Input with Suggestions */}
+            <View style={{ position: "relative", zIndex: 10 }}>
+              <Input
+                label={t("subscription.add.namePlaceholder")}
+                value={name}
+                onChangeText={(text) => {
+                  setName(text);
+                  setShowSuggestions(text.length >= 2);
+                  setSelectedSuggestion(null);
+                }}
+                placeholder={t("subscription.add.nameExample")}
+                onFocus={() => setShowSuggestions(name.length >= 2)}
+              />
+
+              {/* Auto-suggest Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <Animated.View
+                  entering={FadeIn.duration(200)}
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    backgroundColor: theme.bg.card,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: theme.border.default,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 5,
+                    overflow: "hidden",
+                  }}
+                >
+                  {suggestions.map((sub, index) => (
+                    <TouchableOpacity
+                      key={sub.id}
+                      onPress={() => handleSelectSuggestion(sub)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        padding: 12,
+                        borderBottomWidth: index < suggestions.length - 1 ? 1 : 0,
+                        borderBottomColor: theme.border.default,
+                      }}
+                    >
+                      <SafeSvgUri
+                        uri={sub.logoUrl}
+                        width={22}
+                        height={22}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "600", color: theme.text.primary }}>
+                          {sub.name}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: theme.text.tertiary }}>
+                          ${sub.defaultPrice}/mo • {sub.category}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </Animated.View>
+              )}
+            </View>
 
             <View style={{ flexDirection: "row", gap: 12 }}>
               <View style={{ flex: 1 }}>
@@ -229,7 +364,15 @@ export default function AddSubscriptionScreen() {
               </View>
             </View>
 
+            <DatePicker
+              label={t("subscription.detail.renewalDate")}
+              value={renewalDate}
+              onChange={setRenewalDate}
+              minimumDate={new Date()}
+            />
+
             <View style={{ marginBottom: 16 }}>
+
               <Text
                 style={{
                   fontSize: 13,
@@ -248,15 +391,15 @@ export default function AddSubscriptionScreen() {
                 }}
               >
                 {CATEGORIES.map((cat) => {
-                  const IconComponent = CATEGORY_ICONS[cat.id];
+                  const IconComponent = CATEGORY_ICONS[cat.id] || CATEGORY_ICONS.other;
                   return (
                     <TouchableOpacity
                       key={cat.id}
                       onPress={() => setCategory(cat.id)}
                       style={{
-                        paddingHorizontal: 14,
-                        paddingVertical: 10,
-                        borderRadius: 12,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 10,
                         backgroundColor:
                           category === cat.id
                             ? theme.interactive.primary
@@ -265,7 +408,7 @@ export default function AddSubscriptionScreen() {
                               : "rgba(0,0,0,0.03)",
                         flexDirection: "row",
                         alignItems: "center",
-                        gap: 6,
+                        gap: 5,
                         borderWidth: 1,
                         borderColor:
                           category === cat.id
@@ -274,7 +417,7 @@ export default function AddSubscriptionScreen() {
                       }}
                     >
                       <IconComponent
-                        size={16}
+                        size={14}
                         color={
                           category === cat.id
                             ? "#FFFFFF"
@@ -284,7 +427,7 @@ export default function AddSubscriptionScreen() {
                       />
                       <Text
                         style={{
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: "600",
                           color:
                             category === cat.id

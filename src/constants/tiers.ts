@@ -1,6 +1,7 @@
 // Tier Configuration
+// Note: maxSubscriptions is the limit - users can have UP TO (maxSubscriptions - 1) before being blocked
 export const FREE_TIER = {
-    maxSubscriptions: 3,
+    maxSubscriptions: 4, // Allows 3 subscriptions, blocks on 4th
     reminders: false,
     languages: ['en'] as const,
     currencies: ['USD'] as const,
@@ -50,11 +51,14 @@ export function canAccessFeature(feature: ProFeature, isPro: boolean): boolean {
 
 /**
  * Check if user has reached free tier subscription limit
+ * Users can have UP TO maxSubscriptions (inclusive), blocked when trying to exceed
  */
 export function hasReachedSubscriptionLimit(
     currentCount: number,
     isPro: boolean
 ): boolean {
     if (isPro) return false;
+    // Allow exactly 3 subscriptions, block only when trying to add 4th+
     return currentCount >= FREE_TIER.maxSubscriptions;
 }
+

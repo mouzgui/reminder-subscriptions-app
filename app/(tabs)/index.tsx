@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { Card, Badge, Button, ConfirmModal, SafeSvgUri } from "../../src/components/ui";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown, Layout, FadeIn } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../src/theme";
-import { Card, Badge, Button, ConfirmModal } from "../../src/components/ui";
 import { formatCurrency, CurrencyCode } from "../../src/utils/currency";
 import { daysUntil, getRenewalStatus } from "../../src/utils/date";
 import { useSettingsStore } from "../../src/store/settingsStore";
@@ -28,6 +28,7 @@ import {
   TrendingDown,
   Plus,
 } from "../../src/components/icons";
+import { getSubscriptionLogo } from "../../src/constants/popularSubscriptions";
 
 function SubscriptionCard({
   subscription,
@@ -46,39 +47,43 @@ function SubscriptionCard({
   const status = getRenewalStatus(subscription.renewal_date);
   const CategoryIcon = CATEGORY_ICONS[subscription.category || "other"];
 
+  // Get real logo if available
+  const logoUrl = getSubscriptionLogo(subscription.name);
+
   const statusConfig = {
     active: {
       variant: "success" as const,
       text: t("subscription.status.active"),
       color: theme.status.success,
-      bgColor: isDark ? "rgba(34, 197, 94, 0.15)" : "rgba(34, 197, 94, 0.08)",
     },
     expiringSoon: {
       variant: "warning" as const,
       text: t("subscription.status.expiringSoon"),
       color: theme.status.warning,
-      bgColor: isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.08)",
     },
     expired: {
       variant: "danger" as const,
       text: t("subscription.status.expired"),
       color: theme.status.danger,
-      bgColor: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.08)",
     },
     today: {
       variant: "danger" as const,
       text: t("subscription.detail.renewsToday"),
       color: theme.status.danger,
-      bgColor: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.08)",
     },
   };
 
   const config = statusConfig[status];
 
+  const handleDelete = () => {
+    setShowDeleteModal(false);
+    onDelete();
+  };
+
   return (
     <>
       <Animated.View
-        entering={FadeInDown.delay(300 + index * 80).springify()}
+        entering={FadeInDown.delay(200 + index * 60).springify()}
         layout={Layout.springify()}
       >
         <TouchableOpacity
@@ -90,7 +95,7 @@ function SubscriptionCard({
           <Card
             variant="elevated"
             style={{
-              marginBottom: 12,
+              marginBottom: 10,
               overflow: "hidden",
               padding: 14,
               backgroundColor: theme.bg.secondary,
@@ -102,12 +107,12 @@ function SubscriptionCard({
                 alignItems: "center",
               }}
             >
-              {/* Category Icon */}
+              {/* Logo or Category Icon */}
               <View
                 style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
                   backgroundColor: isDark
                     ? "rgba(139, 92, 246, 0.12)"
                     : "rgba(139, 92, 246, 0.06)",
@@ -116,11 +121,26 @@ function SubscriptionCard({
                   marginRight: 12,
                 }}
               >
-                <CategoryIcon
-                  size={24}
-                  color={theme.text.brand}
-                  strokeWidth={2}
-                />
+                {logoUrl ? (
+                  <SafeSvgUri
+                    uri={logoUrl}
+                    width={26}
+                    height={26}
+                    fallback={
+                      <CategoryIcon
+                        size={22}
+                        color={theme.text.brand}
+                        strokeWidth={2}
+                      />
+                    }
+                  />
+                ) : (
+                  <CategoryIcon
+                    size={22}
+                    color={theme.text.brand}
+                    strokeWidth={2}
+                  />
+                )}
               </View>
 
               {/* Content */}
@@ -136,7 +156,7 @@ function SubscriptionCard({
                     <Text
                       numberOfLines={1}
                       style={{
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "700",
                         color: theme.text.primary,
                         marginBottom: 2,
@@ -144,44 +164,38 @@ function SubscriptionCard({
                     >
                       {subscription.name}
                     </Text>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: config.color,
-                          fontWeight: "600",
-                        }}
-                      >
-                        {status === "expired"
-                          ? t("subscription.detail.expired", {
-                            days: Math.abs(days),
-                          })
-                          : days === 0
-                            ? t("subscription.detail.renewsToday")
-                            : days === 1
-                              ? t("subscription.detail.renewsTomorrow")
-                              : t("subscription.detail.renewsIn", { days })}
-                      </Text>
-                    </View>
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: config.color,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {status === "expired"
+                        ? t("subscription.detail.expired", {
+                          days: Math.abs(days),
+                        })
+                        : days === 0
+                          ? t("subscription.detail.renewsToday")
+                          : days === 1
+                            ? t("subscription.detail.renewsTomorrow")
+                            : t("subscription.detail.renewsIn", { days })}
+                    </Text>
                   </View>
 
                   <View style={{ alignItems: "flex-end" }}>
                     <Text
                       style={{
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: "800",
                         color: theme.text.brand,
-                        marginBottom: 4,
+                        marginBottom: 3,
                       }}
                     >
                       {formatCurrency(subscription.price, subscription.currency)}
                     </Text>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
-                      <Badge
-                        variant={config.variant}
-                        size="sm"
-                        style={{ opacity: 0.9 }}
-                      >
+                      <Badge variant={config.variant} size="sm">
                         {config.text}
                       </Badge>
                       <TouchableOpacity
@@ -191,16 +205,16 @@ function SubscriptionCard({
                           setShowDeleteModal(true);
                         }}
                         style={{
-                          padding: 8,
-                          marginLeft: 8,
-                          borderRadius: 10,
+                          padding: 6,
+                          marginLeft: 6,
+                          borderRadius: 8,
                           backgroundColor: isDark
-                            ? "rgba(239, 68, 68, 0.12)"
-                            : "rgba(239, 68, 68, 0.06)",
+                            ? "rgba(239, 68, 68, 0.1)"
+                            : "rgba(239, 68, 68, 0.05)",
                         }}
                       >
                         <Trash2
-                          size={16}
+                          size={14}
                           color={theme.status.danger}
                           strokeWidth={2}
                         />
@@ -217,7 +231,7 @@ function SubscriptionCard({
       <ConfirmModal
         visible={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={onDelete}
+        onConfirm={handleDelete}
         title={t("common.delete")}
         message={t("subscription.detail.deleteConfirm", {
           name: subscription.name,
@@ -249,15 +263,27 @@ export default function DashboardScreen() {
   const getActiveSubscriptions = useSubscriptionStore(
     (state) => state.getActiveSubscriptions
   );
+  const deleteLocalSubscription = useSubscriptionStore(
+    (state) => state.deleteLocalSubscription
+  );
   const deleteSubscription = useSubscriptionStore(
     (state) => state.deleteSubscription
   );
 
   const handleDeleteSubscription = async (sub: Subscription) => {
     try {
-      await deleteSubscription(sub.id);
+      // Check if it's a local/demo subscription
+      if (sub.id.startsWith("local-") || sub.id.startsWith("demo-")) {
+        deleteLocalSubscription(sub.id);
+      } else if (isAuthenticated) {
+        await deleteSubscription(sub.id);
+      } else {
+        // Not authenticated and not local - just remove from local state
+        deleteLocalSubscription(sub.id);
+      }
     } catch (error: any) {
-      console.error("Delete error:", error);
+      // Silently handle - the subscription was already removed optimistically
+      console.log("Delete handled:", error.message);
     }
   };
 
@@ -313,7 +339,7 @@ export default function DashboardScreen() {
         {/* Header */}
         <View
           style={{
-            marginBottom: 24,
+            marginBottom: 20,
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "flex-end",
@@ -322,7 +348,7 @@ export default function DashboardScreen() {
           <View>
             <Text
               style={{
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: "600",
                 color: theme.text.tertiary,
                 marginBottom: 4,
@@ -334,7 +360,7 @@ export default function DashboardScreen() {
             </Text>
             <Text
               style={{
-                fontSize: 28,
+                fontSize: 26,
                 fontWeight: "800",
                 color: theme.text.primary,
                 letterSpacing: -0.5,
@@ -343,31 +369,25 @@ export default function DashboardScreen() {
               {t("dashboard.title")}
             </Text>
           </View>
-          <Badge variant="primary" size="md" style={{ marginBottom: 6 }}>
-            {activeSubscriptions.length}{" "}
-            {t("dashboard.burnRate.activeSubscriptions")}
+          <Badge variant="primary" size="sm" style={{ marginBottom: 6 }}>
+            {activeSubscriptions.length} {t("dashboard.burnRate.activeSubscriptions")}
           </Badge>
         </View>
 
         {/* Burn Rate Section */}
-        <Animated.View entering={FadeInDown.delay(150).springify()}>
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
           <Card
             variant="glass"
             style={{
-              marginBottom: 20,
-              padding: 20,
+              marginBottom: 18,
+              padding: 18,
               backgroundColor: isDark
-                ? "rgba(139, 92, 246, 0.12)"
-                : "rgba(139, 92, 246, 0.06)",
+                ? "rgba(139, 92, 246, 0.1)"
+                : "rgba(139, 92, 246, 0.05)",
               borderWidth: 1,
               borderColor: isDark
-                ? "rgba(139, 92, 246, 0.25)"
-                : "rgba(139, 92, 246, 0.12)",
-              shadowColor: theme.interactive.primary,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 12,
-              elevation: 4,
+                ? "rgba(139, 92, 246, 0.2)"
+                : "rgba(139, 92, 246, 0.1)",
             }}
           >
             <View
@@ -380,10 +400,10 @@ export default function DashboardScreen() {
               <View>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: "600",
                     color: theme.text.tertiary,
-                    marginBottom: 6,
+                    marginBottom: 4,
                     textTransform: "uppercase",
                     letterSpacing: 1,
                   }}
@@ -393,7 +413,7 @@ export default function DashboardScreen() {
                 <View style={{ flexDirection: "row", alignItems: "baseline" }}>
                   <Text
                     style={{
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: "800",
                       color: theme.text.brand,
                       letterSpacing: -1,
@@ -403,7 +423,7 @@ export default function DashboardScreen() {
                   </Text>
                   <Text
                     style={{
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: "600",
                       color: theme.text.tertiary,
                       marginLeft: 4,
@@ -415,18 +435,18 @@ export default function DashboardScreen() {
               </View>
               <View
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
                   backgroundColor: isDark
-                    ? "rgba(139, 92, 246, 0.18)"
-                    : "rgba(139, 92, 246, 0.1)",
+                    ? "rgba(139, 92, 246, 0.15)"
+                    : "rgba(139, 92, 246, 0.08)",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
                 <TrendingDown
-                  size={26}
+                  size={24}
                   color={theme.text.brand}
                   strokeWidth={2}
                 />
@@ -435,8 +455,8 @@ export default function DashboardScreen() {
 
             <View
               style={{
-                marginTop: 16,
-                paddingTop: 14,
+                marginTop: 14,
+                paddingTop: 12,
                 borderTopWidth: 1,
                 borderTopColor: isDark
                   ? "rgba(255,255,255,0.06)"
@@ -448,7 +468,7 @@ export default function DashboardScreen() {
               <View>
                 <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     color: theme.text.tertiary,
                     marginBottom: 2,
                   }}
@@ -457,7 +477,7 @@ export default function DashboardScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: "700",
                     color: theme.text.secondary,
                   }}
@@ -468,7 +488,7 @@ export default function DashboardScreen() {
               <View style={{ alignItems: "flex-end" }}>
                 <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     color: theme.text.tertiary,
                     marginBottom: 2,
                   }}
@@ -477,7 +497,7 @@ export default function DashboardScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: "700",
                     color: theme.text.secondary,
                   }}
@@ -502,10 +522,10 @@ export default function DashboardScreen() {
           </View>
         ) : activeSubscriptions.length > 0 ? (
           <>
-            <View style={{ marginBottom: 14 }}>
+            <View style={{ marginBottom: 12 }}>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: "600",
                   color: theme.text.tertiary,
                   textTransform: "uppercase",
@@ -527,28 +547,28 @@ export default function DashboardScreen() {
           </>
         ) : (
           /* Empty State */
-          <Card variant="glass" style={{ alignItems: "center", padding: 36 }}>
+          <Card variant="glass" style={{ alignItems: "center", padding: 32 }}>
             <View
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: 20,
+                width: 64,
+                height: 64,
+                borderRadius: 18,
                 backgroundColor: isDark
                   ? "rgba(139, 92, 246, 0.15)"
                   : "rgba(139, 92, 246, 0.08)",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 18,
+                marginBottom: 16,
               }}
             >
-              <Plus size={32} color={theme.text.brand} strokeWidth={2} />
+              <Plus size={28} color={theme.text.brand} strokeWidth={2} />
             </View>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: "700",
                 color: theme.text.primary,
-                marginBottom: 8,
+                marginBottom: 6,
                 letterSpacing: -0.3,
               }}
             >
@@ -556,18 +576,18 @@ export default function DashboardScreen() {
             </Text>
             <Text
               style={{
-                fontSize: 14,
+                fontSize: 13,
                 color: theme.text.secondary,
                 textAlign: "center",
-                marginBottom: 20,
-                lineHeight: 20,
+                marginBottom: 18,
+                lineHeight: 18,
               }}
             >
               {t("dashboard.empty.subtitle")}
             </Text>
             <Button
               variant="primary"
-              size="lg"
+              size="md"
               onPress={() => router.push("/add")}
             >
               {t("subscription.add.title")}

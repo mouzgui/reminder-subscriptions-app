@@ -4,3 +4,5 @@ export { Card } from './Card';
 export { Input } from './Input';
 export { Badge } from './Badge';
 export { ConfirmModal } from './ConfirmModal';
+export { DatePicker } from './DatePicker';
+export { SafeSvgUri } from './SafeSvgUri';

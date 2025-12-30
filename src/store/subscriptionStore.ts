@@ -254,25 +254,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             created_at: now.toISOString(),
             updated_at: now.toISOString(),
           },
-          {
-            id: "demo-3",
-            user_id: "local-user",
-            name: "Figma",
-            price: 12.0,
-            currency: "USD",
-            renewal_date: new Date(
-              now.getFullYear(),
-              now.getMonth(),
-              now.getDate() + 18
-            )
-              .toISOString()
-              .split("T")[0],
-            category: "design",
-            is_active: true,
-            reminder_days: [7, 1],
-            created_at: now.toISOString(),
-            updated_at: now.toISOString(),
-          },
         ];
 
         set({ subscriptions: demoSubscriptions, isInitialized: true });
