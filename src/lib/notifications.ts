@@ -1,24 +1,20 @@
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
+/**
+ * Notification Stubs for Expo Go Compatibility
+ * 
+ * expo-notifications doesn't work in Expo Go for SDK 53+.
+ * These are stub implementations that work silently.
+ * 
+ * In production builds, these would be replaced with real implementations.
+ * For now, notifications are disabled in Expo Go.
+ */
+
 import { Subscription } from '../types/subscription';
-
-// Check if we're in Expo Go - notifications don't work there
-const isExpoGo = Constants.appOwnership === 'expo';
-
-// Stub notification handler for Expo Go compatibility
-// Real notifications only work in development builds
 
 /**
  * Request notification permissions
- * @returns Permission status
  */
 export async function requestPermissions(): Promise<boolean> {
-    if (Platform.OS === 'web' || isExpoGo) {
-        return false;
-    }
-
-    // Would normally request permissions here
-    console.log('Notifications disabled in Expo Go');
+    console.log('Notifications: Not available in Expo Go');
     return false;
 }
 
@@ -26,67 +22,61 @@ export async function requestPermissions(): Promise<boolean> {
  * Check if notifications are enabled
  */
 export async function areNotificationsEnabled(): Promise<boolean> {
-    if (Platform.OS === 'web' || isExpoGo) {
-        return false;
-    }
     return false;
 }
 
 /**
- * Schedule a renewal reminder for a subscription
+ * Schedule a renewal reminder (stub)
  */
 export async function scheduleRenewalReminder(
     subscription: Subscription,
     daysBefore: number = 1
 ): Promise<string | null> {
-    if (Platform.OS === 'web' || isExpoGo) {
-        return null;
-    }
-    // Would schedule notification here
+    console.log(`[Stub] Would schedule reminder for ${subscription.name} ${daysBefore} days before`);
     return null;
 }
 
 /**
- * Schedule multiple reminders for a subscription (7 days, 1 day)
+ * Schedule multiple reminders (stub)
  */
 export async function scheduleAllRemindersForSubscription(
     subscription: Subscription,
     reminderDays: number[] = [7, 1]
 ): Promise<string[]> {
-    // Stub - notifications disabled in Expo Go
+    console.log(`[Stub] Would schedule reminders for ${subscription.name}`);
     return [];
 }
 
 /**
- * Cancel a scheduled notification
+ * Cancel a reminder (stub)
  */
 export async function cancelReminder(identifier: string): Promise<void> {
     // Stub
 }
 
 /**
- * Cancel all scheduled notifications for a subscription
+ * Cancel all reminders for a subscription (stub)
  */
 export async function cancelAllRemindersForSubscription(subscriptionId: string): Promise<void> {
     // Stub
 }
 
 /**
- * Cancel all scheduled notifications
+ * Cancel all reminders (stub)
  */
 export async function cancelAllReminders(): Promise<void> {
     // Stub
 }
 
 /**
- * Get all scheduled notifications
+ * Get scheduled reminders (stub)
  */
 export async function getScheduledReminders(): Promise<any[]> {
     return [];
 }
 
 /**
- * Add a listener for notification responses (when user taps notification)
+ * Add notification response listener (stub)
  */
 export function addNotificationResponseListener(
     callback: (response: any) => void
@@ -95,10 +85,34 @@ export function addNotificationResponseListener(
 }
 
 /**
- * Add a listener for notifications received while app is foregrounded
+ * Add notification received listener (stub)
  */
 export function addNotificationReceivedListener(
     callback: (notification: any) => void
 ): { remove: () => void } {
     return { remove: () => { } };
+}
+
+/**
+ * Send test notification (stub)
+ */
+export async function sendTestNotification(): Promise<boolean> {
+    console.log('Notifications not available in Expo Go');
+    return false;
+}
+
+/**
+ * Schedule test notification (stub)
+ */
+export async function scheduleTestNotification(seconds: number = 5): Promise<string | null> {
+    console.log('Notifications not available in Expo Go - use a development build');
+    return null;
+}
+
+/**
+ * Check if notifications are supported
+ */
+export function isNotificationSupported(): boolean {
+    // Always false in Expo Go after SDK 53
+    return false;
 }

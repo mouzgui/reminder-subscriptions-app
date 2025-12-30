@@ -37,6 +37,7 @@ import {
     FileText,
     ArrowLeft,
     Edit3,
+    Bell,
     type LucideIcon,
 } from 'lucide-react-native';
 
@@ -74,6 +75,7 @@ export {
     FileText,
     ArrowLeft,
     Edit3,
+    Bell,
 };
 
 

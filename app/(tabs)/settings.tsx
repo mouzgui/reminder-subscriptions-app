@@ -20,12 +20,16 @@ import { CURRENCIES, CurrencyCode } from "../../src/utils/currency";
 import { PRO_TIER, FREE_TIER } from "../../src/constants/tiers";
 import { exportSubscriptionsToCSV } from "../../src/utils/export";
 import {
+  requestPermissions,
+} from "../../src/lib/notifications";
+import {
   Crown,
   Sun,
   Moon,
   Smartphone,
   ChevronRight,
   Settings as SettingsIcon,
+  Bell,
 } from "../../src/components/icons";
 
 function SettingRow({
@@ -448,11 +452,51 @@ export default function SettingsScreen() {
                 rightElement={
                   <Switch
                     value={pushNotifications}
-                    onValueChange={setPushNotifications}
+                    onValueChange={async (value) => {
+                      if (value) {
+                        const granted = await requestPermissions();
+                        setPushNotifications(granted);
+                      } else {
+                        setPushNotifications(false);
+                      }
+                    }}
                     trackColor={{ true: theme.interactive.primary }}
                   />
                 }
               />
+              {/* Test Notification Button */}
+              <View style={{ paddingVertical: 12 }}>
+                <TouchableOpacity
+                  onPress={async () => {
+                    const { isNotificationSupported, scheduleTestNotification } = require("../../src/lib/notifications");
+                    if (!isNotificationSupported()) {
+                      alert('Notifications are not available in Expo Go.\n\nTo test notifications, you need to create a development build. The reminders will work when you build the app for production.');
+                      return;
+                    }
+                    const id = await scheduleTestNotification(5);
+                    if (id) {
+                      alert('Test notification scheduled! You will receive it in 5 seconds.');
+                    } else {
+                      alert('Could not schedule notification. Please enable notifications first.');
+                    }
+                  }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: isDark ? "rgba(139, 92, 246, 0.15)" : "rgba(139, 92, 246, 0.08)",
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                    borderRadius: 12,
+                    gap: 8,
+                  }}
+                >
+                  <Bell size={18} color={theme.text.brand} strokeWidth={2} />
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: theme.text.brand }}>
+                    Test Notification (5 sec)
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Card>
         </Animated.View>

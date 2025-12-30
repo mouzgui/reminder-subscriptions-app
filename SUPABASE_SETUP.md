@@ -44,30 +44,30 @@ CREATE POLICY "Users can delete their own subscriptions"
 
 ---
 
-## 2. Configure Email Redirect URL
+## 2. Disable Email Confirmation (Recommended for Mobile Apps)
 
-1. Go to Supabase Dashboard → Authentication → URL Configuration
-2. Set **Site URL** to your app's URL:
-   - For development: `exp://` (or your tunnel URL)
-   - For web: `http://localhost:8081`
-3. Add to **Redirect URLs**:
-   - `exp://`
-   - `http://localhost:8081`
-   - Your production URL later
+Email confirmation redirects don't work well with mobile apps because Supabase can't redirect to app custom URL schemes.
+
+**To disable email confirmation:**
+
+1. Go to your **Supabase Project Dashboard**
+2. Click **Authentication** in the left sidebar
+3. Click **Providers** tab (at the top)
+4. Expand the **Email** section
+5. Toggle OFF **"Confirm email"**
+6. Click **Save**
+
+Now users will be logged in immediately after sign up without needing to confirm their email.
 
 ---
 
-## 3. Email Template (Optional)
+## 3. Alternative: Keep Email Confirmation (Advanced)
 
-Go to Authentication → Email Templates → Confirm Signup
+If you need email confirmation, you'll need to:
 
-Change the redirect link from:
-```
-{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
-```
-To just:
-```
-{{ .SiteURL }}
-```
+1. Set up a web page that handles the confirmation redirect
+2. That web page then opens your app using the custom URL scheme
+3. This requires hosting a simple redirect page
 
-This will redirect users to your site URL after confirmation.
+For most mobile apps, disabling email confirmation (Option 2 above) is simpler and sufficient.
+

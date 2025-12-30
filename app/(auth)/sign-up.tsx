@@ -69,16 +69,25 @@ export default function SignUpScreen() {
     const result = await register(email, password);
 
     if (result.success) {
-      Alert.alert(
-        "Check Your Email",
-        "We sent you a confirmation email. Please verify your email address to complete registration.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(auth)/sign-in" as any),
-          },
-        ]
-      );
+      // Check if user is already authenticated (email confirmation disabled in Supabase)
+      const isAuthenticated = useUserStore.getState().isAuthenticated;
+
+      if (isAuthenticated) {
+        // Email confirmation is disabled - user is logged in immediately
+        router.replace("/(tabs)");
+      } else {
+        // Email confirmation is enabled - show message and redirect to sign-in
+        Alert.alert(
+          "Check Your Email",
+          "We sent you a confirmation email. Please verify your email address, then sign in.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/(auth)/sign-in" as any),
+            },
+          ]
+        );
+      }
     } else {
       setError(result.error || t("errors.generic"));
     }

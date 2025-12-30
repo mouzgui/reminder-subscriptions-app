@@ -19,6 +19,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 // Auth helpers
 export async function signUp(email: string, password: string) {
+    // Note: For mobile apps, email confirmation redirects can be problematic.
+    // Option 1: Disable email confirmation in Supabase Dashboard → Authentication → Settings → Email Auth
+    // Option 2: Use the redirect URL and handle it in your app
+    // Option 3: Keep email confirmation but tell users to sign in after confirming
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
